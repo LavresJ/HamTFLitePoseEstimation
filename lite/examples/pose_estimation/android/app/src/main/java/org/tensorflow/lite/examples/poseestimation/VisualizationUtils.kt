@@ -113,6 +113,8 @@ object VisualizationUtils {
                     CIRCLE_RADIUS,
                     paintCircle
                 )
+                //test
+
             }
         }
         return output

@@ -271,6 +271,8 @@ class CameraSource(
 
     private fun visualize(persons: List<Person>, bitmap: Bitmap) {
 
+
+
         val outputBitmap = VisualizationUtils.drawBodyKeypoints(
             bitmap,
             persons.filter { it.score > MIN_CONFIDENCE }, isTrackerEnabled
@@ -324,4 +326,31 @@ class CameraSource(
 
         fun onDetectedInfo(personScore: Float?, poseLabels: List<Pair<String, Float>>?)
     }
+
+
+    ///////
+    fun getPersons(): List<Person> {
+        val rotateMatrix = Matrix()
+        rotateMatrix.postRotate(90.0f)
+
+        var bitmap =
+            Bitmap.createBitmap(
+                PREVIEW_WIDTH,
+                PREVIEW_HEIGHT,
+                Bitmap.Config.ARGB_8888
+            )
+        val rotatedBitmap = Bitmap.createBitmap(
+            bitmap, 0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT,
+            rotateMatrix, false)
+
+        val persons = mutableListOf<Person>()
+
+        synchronized(lock) {
+            detector?.estimatePoses(rotatedBitmap)?.let {
+                persons.addAll(it)
+            }
+        }
+        return persons
+    }
+    //////////
 }

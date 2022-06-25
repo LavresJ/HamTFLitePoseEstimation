@@ -36,6 +36,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.tensorflow.lite.examples.poseestimation.camera.CameraSource
 import org.tensorflow.lite.examples.poseestimation.data.Device
+import org.tensorflow.lite.examples.poseestimation.data.Person
 import org.tensorflow.lite.examples.poseestimation.ml.*
 
 class MainActivity : AppCompatActivity() {
@@ -56,6 +57,8 @@ class MainActivity : AppCompatActivity() {
 
     /** Default device is CPU */
     private var device = Device.CPU
+
+    private lateinit var tvKeypoint: TextView
 
     private lateinit var tvScore: TextView
     private lateinit var tvFPS: TextView
@@ -135,6 +138,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         // keep screen on while app is running
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        tvKeypoint = findViewById(R.id.tvKeypoint)
+
         tvScore = findViewById(R.id.tvScore)
         tvFPS = findViewById(R.id.tvFps)
         spnModel = findViewById(R.id.spnModel)
@@ -209,7 +215,15 @@ class MainActivity : AppCompatActivity() {
                                     convertPoseLabels(if (it.size >= 3) it[2] else null)
                                 )
                             }
+
+                            //////
+                            val person = cameraSource?.getPersons()?.first()
+                            var point = person?.keyPoints?.get(0)?.coordinate
+                            //var point = 40
+                            tvKeypoint.text = "KeyPoint: "+point.toString()
+
                         }
+
 
                     }).apply {
                         prepareCamera()
@@ -218,8 +232,11 @@ class MainActivity : AppCompatActivity() {
                 lifecycleScope.launch(Dispatchers.Main) {
                     cameraSource?.initCamera()
                 }
+
             }
             createPoseEstimator()
+
+
         }
     }
 
@@ -324,11 +341,7 @@ class MainActivity : AppCompatActivity() {
                     showToast(getString(R.string.tfe_pe_gpu_error))
                 }
                 showTracker(true)
-                MoveNetMultiPose.create(
-                    this,
-                    device,
-                    Type.Dynamic
-                )
+                MoveNetMultiPose.create(this, device, Type.Dynamic)
             }
             3 -> {
                 // PoseNet (SinglePose)

@@ -4,7 +4,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+   http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import android.Manifest
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.pm.PackageManager
+import android.graphics.PointF
 import android.os.Bundle
 import android.os.Process
 import android.view.SurfaceView
@@ -59,6 +60,7 @@ class MainActivity : AppCompatActivity() {
     private var device = Device.CPU
 
     private lateinit var tvKeypoint: TextView
+    private var lastboolean =true
 
     private lateinit var tvScore: TextView
     private lateinit var tvFPS: TextView
@@ -216,12 +218,14 @@ class MainActivity : AppCompatActivity() {
                                 )
                             }
 
-                            //////
+                            //////鼻子的座標
                             val person = cameraSource?.getPersons()?.first()
                             var point = person?.keyPoints?.get(0)?.coordinate
                             //var point = 40
-                            tvKeypoint.text = "KeyPoint: "+point.toString()
 
+                            //呼叫揮劍次數函數
+                            var count = count_sword()
+                            tvKeypoint.text = "揮劍次數:"+count.toString()
                         }
 
 
@@ -440,4 +444,36 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+    //判斷揮劍次數
+    private  fun count_sword():Int{
+        val person = cameraSource?.getPersons()?.first()
+        var pointShoulder = person?.keyPoints?.get(6)?.coordinate?.y?.toFloat()
+        var pointWrist = person?.keyPoints?.get(10)?.coordinate?.y?.toFloat()
+        var count = 0//手腕肩膀之間的變化數
+        var countsword = 0//揮劍次數
+
+        var temp = true//手腕低於肩膀
+        //var shoulder = mutableListOf<Float>()//宣告一個肩膀陣列
+        //var wrist = mutableListOf<Float>()//宣告一個手腕陣列
+        //shoulder.add(pointShoulder)//將肩膀關節點資料加入陣列當中(包含x軸、y軸、準確率??)
+        //wrist.add(pointWrist)//將手腕關節點資料加入陣列當中(包含x軸、y軸、準確率??)
+
+        if (pointWrist != null) {
+            if(pointWrist > pointShoulder!!){
+                temp = true
+            }
+            else {
+                temp = false
+            }
+        }
+        if (lastboolean != temp){
+            count++
+        }
+        countsword = count/2
+        lastboolean = temp
+
+        return countsword
+    }
+
+
 }
